@@ -16,7 +16,7 @@
           - "The metalogger we are working with is {{ inventory_hostname }} with IP {{ ansible_default_ipv4.address }}"
 
     - name: Check the list of connected metalogger servers using mfscli
-      command: mfscli -SMB -H {{ moosefs_master_host }}
+      command: mfscli -SMB -H {{ moosefs_master_host }} -p -s ' '
       register: moosefs_metalogger_status_list
       check_mode: false
       changed_when: false
@@ -24,12 +24,12 @@
     - name: Print the list we just grabbed
       debug:
         msg:
-          - "Connected metaloggers: {{ moosefs_metalogger_status_list.stdout }}"
+          - "Connected metaloggers: {{ moosefs_metalogger_status_list.stdout_lines }}"
 
     - name: DEBUG - Check if the currently targeted metalogger is connected to the cluster
       debug:
         msg:
-          - "{{ moosefs_metalogger_status_list.stdout | select('search', 'blinky') }}"
+          - "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') }}"
 
   tasks:
     - name: Restart metalogger service
