@@ -1,0 +1,7 @@
+---
+- name: Install MooseFS
+  hosts: all
+  become: true
+
+  roles:
+    - zorlin.moosefs
