@@ -1,5 +1,9 @@
 Early WIP...
 
+inventory = testing purposes
+
+inventory-production is an example of what I use in my homelab/Elastic NAS
+
 TODO
 ====
 

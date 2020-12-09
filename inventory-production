@@ -1,25 +1,21 @@
 [all:vars]
-moosefs_master_host = localhost
+moosefs_master_host = 10.1.1.199
 
 [moosefs]
-10.1.1.201
-10.1.1.202
-10.1.1.203
-10.1.1.204
 
 [moosefs_master]
 
 [moosefs_metalogger]
-10.1.1.201
-10.1.1.202
-10.1.1.203
-10.1.1.204
+blinky	ansible_host=10.1.1.201
+pinky	ansible_host=10.1.1.202
+inky	ansible_host=10.1.1.203
+clyde	ansible_host=10.1.1.204
 
 [moosefs_chunkserver]
-10.1.1.201
-10.1.1.202
-10.1.1.203
-10.1.1.204
+blinky	ansible_host=10.1.1.201
+pinky	ansible_host=10.1.1.202
+inky	ansible_host=10.1.1.203
+clyde	ansible_host=10.1.1.204
 
 [moosefs_client]
-10.1.1.201
+blinky	ansible_host=10.1.1.201
