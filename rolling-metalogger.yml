@@ -7,7 +7,7 @@
   become: true
 
   vars:
-    moosefs_restart_metaloggers: true
+    moosefs_restart_metaloggers: false
 
   pre_tasks:
     - name: Print the metalogger we are working with
