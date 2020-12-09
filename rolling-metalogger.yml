@@ -7,10 +7,16 @@
   become: true
 
   pre_tasks:
+  - name: Print the metalogger we are working with
+    debug:
+      msg:
+        - "The metalogger we are working with is {{ inventory_hostname}} with IP {{ ansible_default_ipv4.address }}"
+
   - name: Check the list of connected metalogger servers using mfscli
     command: mfscli -SMB -H {{ moosefs_master_host }}
     register: moosefs_metalogger_status_list
     check_mode: false
+    changed_when: false
 
   - name: Print the list we just grabbed
     debug:
