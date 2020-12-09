@@ -1,3 +1,6 @@
+[all:vars]
+moosefs_master_host: localhost
+
 [moosefs]
 10.1.1.201
 10.1.1.202
