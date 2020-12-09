@@ -3,5 +3,10 @@
   hosts: all
   become: true
 
+  tasks:
+    - name: Print Ansible info useful for development
+      debug:
+        msg: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+
   roles:
     - zorlin.moosefs
