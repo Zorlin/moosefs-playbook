@@ -1,6 +1,6 @@
 ---
 - name: Install MooseFS
-  hosts: all
+  hosts: moosefs
   become: true
 
   tasks:
