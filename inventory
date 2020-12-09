@@ -1,14 +1,14 @@
 [moosefs]
 localhost
 
-[moosefs-master]
+[moosefs_master]
 localhost
 
-[moosefs-metalogger]
+[moosefs_metalogger]
 localhost
 
-[moosefs-chunkserver]
+[moosefs_chunkserver]
 localhost
 
-[moosefs-client]
+[moosefs_client]
 localhost
