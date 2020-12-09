@@ -1,22 +1,14 @@
 [moosefs]
-10.1.1.201
-10.1.1.202
-10.1.1.203
-10.1.1.204
+localhost
 
 [moosefs-master]
+localhost
 
 [moosefs-metalogger]
-10.1.1.201
-10.1.1.202
-10.1.1.203
-10.1.1.204
+localhost
 
 [moosefs-chunkserver]
-10.1.1.201
-10.1.1.202
-10.1.1.203
-10.1.1.204
+localhost
 
 [moosefs-client]
-10.1.1.201
+localhost
