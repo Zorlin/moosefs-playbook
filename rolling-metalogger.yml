@@ -29,7 +29,7 @@
     - name: DEBUG - Check if the currently targeted metalogger is connected to the cluster
       debug:
         msg:
-          - "{{ moosefs_metalogger_status_list.stdout_lines | select('match', '{{ ansible_default_ipv4.address }}') }}"
+          - "{{ moosefs_metalogger_status_list.stdout | select('search', 'blinky') }}"
 
   tasks:
     - name: Restart metalogger service
