@@ -6,27 +6,36 @@
   serial: 1
   become: true
 
+  vars:
+    moosefs_restart_metaloggers: true
+
   pre_tasks:
-  - name: Print the metalogger we are working with
-    debug:
-      msg:
-        - "The metalogger we are working with is {{ inventory_hostname}} with IP {{ ansible_default_ipv4.address }}"
+    - name: Print the metalogger we are working with
+      debug:
+        msg:
+          - "The metalogger we are working with is {{ inventory_hostname }} with IP {{ ansible_default_ipv4.address }}"
 
-  - name: Check the list of connected metalogger servers using mfscli
-    command: mfscli -SMB -H {{ moosefs_master_host }}
-    register: moosefs_metalogger_status_list
-    check_mode: false
-    changed_when: false
+    - name: Check the list of connected metalogger servers using mfscli
+      command: mfscli -SMB -H {{ moosefs_master_host }}
+      register: moosefs_metalogger_status_list
+      check_mode: false
+      changed_when: false
 
-  - name: Print the list we just grabbed
-    debug:
-      msg:
-        - "Connected metaloggers: {{ moosefs_metalogger_status_list.stdout }}"
+    - name: Print the list we just grabbed
+      debug:
+        msg:
+          - "Connected metaloggers: {{ moosefs_metalogger_status_list.stdout }}"
+
+    - name: DEBUG - Check if the currently targeted metalogger is connected to the cluster
+      debug:
+        msg:
+          - "{{ moosefs_metalogger_status_list.stdout_lines | select('match', '{{ ansible_default_ipv4.address }}') }}"
 
   tasks:
-  # - name: Restart metalogger service
-  #   service:
-  #     name: moosefs-metalogger
-  #     state: restarted
+    - name: Restart metalogger service
+      service:
+        name: moosefs-metalogger
+        state: restarted
+      when: moosefs_restart_metaloggers
 
   post_tasks:
