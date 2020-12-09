@@ -1,5 +1,5 @@
 [all:vars]
-moosefs_master_host: localhost
+moosefs_master_host = localhost
 
 [moosefs]
 localhost
