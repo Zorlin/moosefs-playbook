@@ -1,0 +1,26 @@
+---
+# This playbook restarts the metaloggers one by one and waits for each to come up before moving to the next
+# Currently it does not handle package upgrades as we are not using packages yet
+- name: Restart metaloggers for updates
+  hosts: moosefs_metalogger
+  serial: 1
+  become: true
+
+  pre_tasks:
+  - name: Check the list of connected metalogger servers using mfscli
+    command: mfscli -SMB -H {{ moosefs_master_host }}
+    register: moosefs_metalogger_status_list
+    check_mode: false
+
+  - name: Print the list we just grabbed
+    debug:
+      msg:
+        - "Connected metaloggers: {{ moosefs_metalogger_status_list.stdout }}"
+
+  tasks:
+  # - name: Restart metalogger service
+  #   service:
+  #     name: moosefs-metalogger
+  #     state: restarted
+
+  post_tasks:
