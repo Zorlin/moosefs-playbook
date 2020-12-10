@@ -3,6 +3,7 @@
 # It checks health and allows you to take different actions based on that.
 # By default it only upgrades metaloggers that are healthy and out of date.
 # Currently it does not handle package upgrades as we are not using packages yet
+# TODO - https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html#comparing-versions should improve logic and code
 - name: Restart metaloggers
   hosts: moosefs_metalogger
   serial: 1
