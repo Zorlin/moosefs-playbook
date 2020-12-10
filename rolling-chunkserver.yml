@@ -42,6 +42,13 @@
       check_mode: false
       changed_when: false
 
+    - name: DEBUG - Print current state of chunk matrix and interesting stuff from it
+      debug:
+        msg:
+          - "Missing {{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') }}"
+          - "Endangered {{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') }}"
+          - "Undergoal {{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') }}"
+
     - name: Determine the current state of the chunk matrix (logic does not work yet)
       set_fact:
         moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | length == 0 }}"
