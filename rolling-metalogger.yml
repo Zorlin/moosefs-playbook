@@ -1,13 +1,16 @@
 ---
 # This playbook restarts the metaloggers one by one and waits for each to come up before moving to the next
+# It checks health and allows you to take different actions based on that.
+# By default it only upgrades metaloggers that are healthy and out of date.
 # Currently it does not handle package upgrades as we are not using packages yet
-- name: Restart metaloggers for updates
+- name: Restart metaloggers
   hosts: moosefs_metalogger
   serial: 1
   become: true
 
   vars:
-    moosefs_restart_metaloggers: false
+    moosefs_restart_metaloggers: true
+    moosefs_restart_metaloggers_force: false
     moosefs_version: '3.0.115'
 
   pre_tasks:
