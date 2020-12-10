@@ -44,9 +44,9 @@
 
     - name: Determine the current state of the chunk matrix (logic does not work yet)
       set_fact:
-        moosefs_chunks_missing: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass missing:') | length == 0 }}"
-        moosefs_chunks_endangered: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass endangered:' | length != 0 }}"
-        moosefs_chunks_undergoal: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass undergoal:') | length == 0 }}"
+        moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | length == 0 }}"
+        moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:' | length != 0 }}"
+        moosefs_chunks_undergoal: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | length == 0 }}"
 
     - name: Print the current state of the chunk matrix
       debug:
