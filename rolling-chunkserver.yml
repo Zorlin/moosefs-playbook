@@ -49,18 +49,18 @@
           - "Endangered {{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') }}"
           - "Undergoal {{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') }}"
 
-    - name: Determine the current state of the chunk matrix (logic does not work yet)
+    - name: Determine the current state of the chunk matrix (logic in beta)
       set_fact:
-        moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | length == 0 }}"
-        moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | length != 0 }}"
-        moosefs_chunks_undergoal: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | length == 0 }}"
+        moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | select('search', ': 0') | length == 0 }}"
+        moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | select('search', ': 0') | length == 0 }}"
+        moosefs_chunks_undergoal: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | select('search', ': 0') | length == 0 }}"
 
     - name: Print the current state of the chunk matrix
       debug:
         msg:
           - "Chunks missing? {{ moosefs_chunks_missing }}"
           - "Chunks endangered? {{ moosefs_chunks_endangered }}"
-          - "Upgrade needed? {{ moosefs_chunks_undergoal }}"
+          - "Chunks undergoal? {{ moosefs_chunks_undergoal }}"
 
   tasks:
     - name: Restart chunkserver service
