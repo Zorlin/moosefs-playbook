@@ -8,6 +8,7 @@
 
   vars:
     moosefs_restart_metaloggers: false
+    moosefs_version: '3.0.115'
 
   pre_tasks:
     - name: Print the metalogger we are working with
@@ -21,7 +22,7 @@
       check_mode: false
       changed_when: false
 
-    - name: Print the list we just grabbed
+    - name: DEBUG - Print the list we just grabbed
       debug:
         msg:
           - "Connected metaloggers: {{ moosefs_metalogger_status_list.stdout_lines }}"
@@ -42,9 +43,9 @@
 
     - name: Determine the current state of the metalogger
       set_fact:
-        moosefs_metalogger_connected: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | length != 0 }}"
-        moosefs_metalogger_version_match: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length != 0 }}"
-        moosefs_metalogger_upgrade_needed: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length == 0 }}"
+        moosefs_metalogger_connected: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | length != 0 }}"
+        moosefs_metalogger_version_match: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length != 0 }}"
+        moosefs_metalogger_upgrade_needed: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length == 0 }}"
 
     - name: Print the current state of the metalogger
       debug:
