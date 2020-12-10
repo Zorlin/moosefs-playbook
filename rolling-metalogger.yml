@@ -25,25 +25,6 @@
       check_mode: false
       changed_when: false
 
-    - name: DEBUG - Print the list we just grabbed
-      debug:
-        msg:
-          - "Connected metaloggers: {{ moosefs_metalogger_status_list.stdout_lines }}"
-
-    - name: DEBUG - Check if the currently targeted metalogger is connected to the cluster and other stuff
-      debug:
-        msg:
-          - "inv hostname {{ inventory_hostname }}"
-          - "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') }}"
-          - "Connected? {{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | length != 0 }}"
-          - "Version? {{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') }}"
-          - "Version match? {{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length != 0 }}"
-          - "Upgrade needed? {{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length == 0 }}"
-
-    # - name: Parse the list of connected metalogger servers and find relevant information about this metalogger
-    #   set_fact:
-    #     moosefs_metalogger
-
     - name: Determine the current state of the metalogger
       set_fact:
         moosefs_metalogger_connected: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | length != 0 }}"
