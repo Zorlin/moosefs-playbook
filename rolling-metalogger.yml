@@ -29,7 +29,12 @@
     - name: DEBUG - Check if the currently targeted metalogger is connected to the cluster
       debug:
         msg:
+          - "inv hostname {{ inventory_hostname }}"
           - "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') }}"
+          - "Connected? {{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | length != 0 }}"
+          - "Version? {{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') }}"
+          - "Version match? {{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length != 0 }}"
+          - "Upgrade needed? {{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length == 0 }}"
 
   tasks:
     - name: Restart metalogger service
