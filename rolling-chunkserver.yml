@@ -5,11 +5,7 @@
 # Currently it does not handle package upgrades as we are not using packages yet
 # DO NOT USE YET JUST COPIED AND PASTED FROM METALOGGERS WITH A COUPLE TWEAKS
 # todo - check chunk state before and after each chunkserver restart
-# example: mfscli -SIC -p
-# which we can parse
-# and simply check for the text if "chunkclass endangered:	0"
-# and if it's 0, we know that nothing is in danger!
-# we can do other neat stuff with...
+# chunkclass endangered: 1300 (not do stuff if some chunks are endangered)
 # chunkclass undergoal:	163472 (not do stuff if some chunks are undergoal)
 # chunkclass missing: 0 (not do stuff if there are missing chunks unaccounted for)
 # etc...
