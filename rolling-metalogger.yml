@@ -41,6 +41,8 @@
       service:
         name: moosefs-metalogger
         state: restarted
-      when: moosefs_restart_metaloggers
+      when:
+        - moosefs_restart_metaloggers
+        - moosefs_metalogger_upgrade_needed or moosefs_restart_metaloggers_force
 
   post_tasks:
