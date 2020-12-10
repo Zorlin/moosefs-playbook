@@ -44,14 +44,14 @@
       set_fact:
         moosefs_metalogger_connected: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | length != 0 }}"
         moosefs_metalogger_version_match: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length != 0 }}"
-        moosefs_metalogger_upgrade_needed: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length != 0 }}"
+        moosefs_metalogger_upgrade_needed: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', 'blinky') | select('search', '3.0.115') | length == 0 }}"
 
     - name: Print the current state of the metalogger
       debug:
         msg:
           - "Connected? {{ moosefs_metalogger_connected }}"
           - "Version matches target? {{ moosefs_metalogger_version_match }}"
-          - "Upgrade neeeded? {{ moosefs_metalogger_upgrade_needed }}"
+          - "Upgrade needed? {{ moosefs_metalogger_upgrade_needed }}"
 
   tasks:
     - name: Restart metalogger service
