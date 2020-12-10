@@ -31,7 +31,7 @@
           - "The chunkserver we are working with is {{ inventory_hostname }} with IP {{ ansible_default_ipv4.address }}"
 
     - name: Check the state of the chunk matrix before any changes
-      command: mfscli -SIC -p -s ' '
+      command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
       register: moosefs_chunks_status
       check_mode: false
       changed_when: false
