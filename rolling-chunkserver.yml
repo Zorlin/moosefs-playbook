@@ -1,0 +1,86 @@
+---
+# This playbook restarts the chunkservers one by one and waits for each to come up before moving to the next
+# It checks health and allows you to take different actions based on that.
+# By default it only upgrades metaloggers that are healthy and out of date.
+# Currently it does not handle package upgrades as we are not using packages yet
+# DO NOT USE YET JUST COPIED AND PASTED FROM METALOGGERS WITH A COUPLE TWEAKS
+# todo - check chunk state before and after each chunkserver restart
+# example: mfscli -SIC -p
+# which we can parse
+# and simply check for the text if "chunkclass endangered:	0"
+# and if it's 0, we know that nothing is in danger!
+# we can do other neat stuff with...
+# chunkclass undergoal:	163472 (not do stuff if some chunks are undergoal)
+# chunkclass missing: 0 (not do stuff if there are missing chunks unaccounted for)
+# etc...
+
+- name: Restart chunkservers
+  hosts: moosefs_chunkserver
+  serial: 1
+  become: true
+
+  vars:
+    moosefs_restart_chunkservers: true
+    moosefs_restart_chunkservers_force: false
+    moosefs_version: '3.0.115'
+
+  pre_tasks:
+    - name: Print the chunkserver we are working with
+      debug:
+        msg:
+          - "The metalogger we are working with is {{ inventory_hostname }} with IP {{ ansible_default_ipv4.address }}"
+
+    - name: Check the list of connected metalogger servers using mfscli
+      command: mfscli -SMB -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_metalogger_status_list
+      check_mode: false
+      changed_when: false
+
+    - name: Determine the current state of the metalogger
+      set_fact:
+        moosefs_metalogger_connected: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | length != 0 }}"
+        moosefs_metalogger_version_match: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length != 0 }}"
+        moosefs_metalogger_upgrade_needed: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length == 0 }}"
+
+    - name: Print the current state of the metalogger
+      debug:
+        msg:
+          - "Connected? {{ moosefs_metalogger_connected }}"
+          - "Version matches target? {{ moosefs_metalogger_version_match }}"
+          - "Upgrade needed? {{ moosefs_metalogger_upgrade_needed }}"
+
+  tasks:
+    - name: Restart metalogger service
+      service:
+        name: moosefs-metalogger
+        state: restarted
+      when:
+        - moosefs_restart_metaloggers
+        - moosefs_metalogger_upgrade_needed or moosefs_restart_metaloggers_force
+
+  post_tasks:
+    - name: Check the list of connected metalogger servers using mfscli
+      command: mfscli -SMB -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_metalogger_status_list
+      check_mode: false
+      changed_when: false
+
+    - name: Determine the current state of the metalogger
+      set_fact:
+        moosefs_metalogger_connected: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | length != 0 }}"
+        moosefs_metalogger_version_match: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length != 0 }}"
+        moosefs_metalogger_upgrade_needed: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length == 0 }}"
+
+    - name: Print the current state of the metalogger
+      debug:
+        msg:
+          - "Connected? {{ moosefs_metalogger_connected }}"
+          - "Version matches target? {{ moosefs_metalogger_version_match }}"
+          - "Upgrade needed? {{ moosefs_metalogger_upgrade_needed }}"
+
+    - name: Prevent moving on if there was an issue
+      assert:
+        that:
+          - moosefs_metalogger_connected
+          - moosefs_metalogger_version_match
+          - not moosefs_metalogger_upgrade_needed
