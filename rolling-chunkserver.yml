@@ -28,19 +28,25 @@
     - name: Print the chunkserver we are working with
       debug:
         msg:
-          - "The metalogger we are working with is {{ inventory_hostname }} with IP {{ ansible_default_ipv4.address }}"
+          - "The chunkserver we are working with is {{ inventory_hostname }} with IP {{ ansible_default_ipv4.address }}"
 
-    - name: Check the list of connected metalogger servers using mfscli
-      command: mfscli -SMB -H {{ moosefs_master_host }} -p -s ' '
-      register: moosefs_metalogger_status_list
+    - name: Check the state of the chunk matrix before any changes
+      command: mfscli -SIC -p -s ' '
+      register: moosefs_chunks_status
       check_mode: false
       changed_when: false
 
-    - name: Determine the current state of the metalogger
+    - name: Check the list of all connected chunkservers using mfscli
+      command: mfscli -SCS -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_chunkserver_status_list
+      check_mode: false
+      changed_when: false
+
+    - name: Determine the current state of the chunk matrix (logic does not work yet)
       set_fact:
-        moosefs_metalogger_connected: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | length != 0 }}"
-        moosefs_metalogger_version_match: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length != 0 }}"
-        moosefs_metalogger_upgrade_needed: "{{ moosefs_metalogger_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length == 0 }}"
+        moosefs_chunks_missing: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass missing:') | length == 0 }}"
+        moosefs_chunks_endangered: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass endangered:' | select('search', moosefs_version) | length != 0 }}"
+        moosefs_chunks_undergoal: "{{ moosefs_chunks_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length == 0 }}"
 
     - name: Print the current state of the metalogger
       debug:
