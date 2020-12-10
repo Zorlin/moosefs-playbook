@@ -45,24 +45,24 @@
     - name: Determine the current state of the chunk matrix (logic does not work yet)
       set_fact:
         moosefs_chunks_missing: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass missing:') | length == 0 }}"
-        moosefs_chunks_endangered: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass endangered:' | select('search', moosefs_version) | length != 0 }}"
-        moosefs_chunks_undergoal: "{{ moosefs_chunks_status_list.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length == 0 }}"
+        moosefs_chunks_endangered: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass endangered:' | length != 0 }}"
+        moosefs_chunks_undergoal: "{{ moosefs_chunks_status_list.stdout_lines | select('search', 'chunkclass undergoal:') | length == 0 }}"
 
-    - name: Print the current state of the metalogger
+    - name: Print the current state of the chunk matrix
       debug:
         msg:
-          - "Connected? {{ moosefs_metalogger_connected }}"
-          - "Version matches target? {{ moosefs_metalogger_version_match }}"
-          - "Upgrade needed? {{ moosefs_metalogger_upgrade_needed }}"
+          - "Chunks missing? {{ moosefs_chunks_missing }}"
+          - "Chunks endangered? {{ moosefs_chunks_endangered }}"
+          - "Upgrade needed? {{ moosefs_chunks_undergoal }}"
 
   tasks:
-    - name: Restart metalogger service
+    - name: Restart chunkserver service
       service:
-        name: moosefs-metalogger
+        name: moosefs-chunkserver
         state: restarted
       when:
-        - moosefs_restart_metaloggers
-        - moosefs_metalogger_upgrade_needed or moosefs_restart_metaloggers_force
+        - moosefs_restart_chunkserver
+        - moosefs_chunkserver_upgrade_needed or moosefs_restart_chunkservers_force
 
   post_tasks:
     - name: Check the list of connected metalogger servers using mfscli
