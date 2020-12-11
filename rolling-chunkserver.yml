@@ -42,7 +42,7 @@
       check_mode: false
       changed_when: false
 
-    - name: Determine the current state of the chunk matrix (logic in beta)
+    - name: Determine the current state of the chunk matrix
       set_fact:
         moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | select('search', ': 0') | length == 0 }}"
         moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | select('search', ': 0') | length == 0 }}"
@@ -75,6 +75,25 @@
         - not (moosefs_chunks_undergoal and moosefs_abort_on_undergoal_chunks)
 
   post_tasks:
+    - name: Check the state of the chunk matrix after our run
+      command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_chunks_status
+      check_mode: false
+      changed_when: false
+
+    - name: Determine the current state of the chunk matrix
+      set_fact:
+        moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | select('search', ': 0') | length == 0 }}"
+        moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | select('search', ': 0') | length == 0 }}"
+        moosefs_chunks_undergoal: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | select('search', ': 0') | length == 0 }}"
+
+    - name: Print the current state of the chunk matrix
+      debug:
+        msg:
+          - "Chunks missing? {{ moosefs_chunks_missing }}"
+          - "Chunks endangered? {{ moosefs_chunks_endangered }}"
+          - "Chunks undergoal? {{ moosefs_chunks_undergoal }}"
+
     - name: Check the list of connected metalogger servers using mfscli
       command: mfscli -SMB -H {{ moosefs_master_host }} -p -s ' '
       register: moosefs_metalogger_status_list
