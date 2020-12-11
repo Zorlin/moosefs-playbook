@@ -21,7 +21,7 @@
     moosefs_chunkserver_upgrade_needed: false
     moosefs_abort_on_missing_chunks: true
     moosefs_abort_on_endangered_chunks: true
-    moosefs_abort_on_undergoal_chunks: true
+    moosefs_abort_on_undergoal_chunks: false
     moosefs_version: '3.0.115'
 
   pre_tasks:
@@ -42,13 +42,6 @@
       check_mode: false
       changed_when: false
 
-    - name: DEBUG - Print current state of chunk matrix and interesting stuff from it
-      debug:
-        msg:
-          - "Missing {{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') }}"
-          - "Endangered {{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') }}"
-          - "Undergoal {{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') }}"
-
     - name: Determine the current state of the chunk matrix (logic in beta)
       set_fact:
         moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | select('search', ': 0') | length == 0 }}"
@@ -62,6 +55,13 @@
           - "Chunks endangered? {{ moosefs_chunks_endangered }}"
           - "Chunks undergoal? {{ moosefs_chunks_undergoal }}"
 
+    - name: Give some feedback as to what will happen next
+      debug:
+        msg:
+          - "Abort due to missing chunks: {{ moosefs_chunks_missing and moosefs_abort_on_missing_chunks }}"
+          - "Abort due to endangered chunks: {{ moosefs_chunks_endangered and moosefs_abort_on_endangered_chunks }}"
+          - "Abort due to undergoal chunks: {{ moosefs_chunks_undergoal and moosefs_abort_on_undergoal_chunks }}"
+
   tasks:
     - name: Restart chunkserver service
       service:
@@ -70,9 +70,9 @@
       when:
         - moosefs_restart_chunkservers
         - moosefs_chunkserver_upgrade_needed or moosefs_restart_chunkservers_force
-        - not moosefs_chunks_missing or not moosefs_abort_on_missing_chunks
-        - not moosefs_chunks_endangered or not moosefs_abort_on_endangered_chunks
-        - not moosefs_chunks_undergoal or not moosefs_abort_on_undergoal_chunks
+        - not (moosefs_chunks_missing and moosefs_abort_on_missing_chunks)
+        - not (moosefs_chunks_endangered and moosefs_abort_on_endangered_chunks)
+        - not (moosefs_chunks_undergoal and moosefs_abort_on_undergoal_chunks)
 
   post_tasks:
     - name: Check the list of connected metalogger servers using mfscli
