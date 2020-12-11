@@ -18,6 +18,9 @@
   vars:
     moosefs_restart_chunkservers: true
     moosefs_restart_chunkservers_force: false
+    moosefs_abort_on_missing_chunks: true
+    moosefs_abort_on_endangered_chunks: true
+    moosefs_abort_on_undergoal_chunks: true
     moosefs_version: '3.0.115'
 
   pre_tasks:
@@ -62,10 +65,13 @@
     - name: Restart chunkserver service
       service:
         name: moosefs-chunkserver
-        state: restarted
+        state: started
       when:
-        - moosefs_restart_chunkserver
+        - moosefs_restart_chunkservers
         - moosefs_chunkserver_upgrade_needed or moosefs_restart_chunkservers_force
+        - not moosefs_chunks_missing or not moosefs_abort_on_missing_chunks
+        - not moosefs_chunks_endangered or not moosefs_abort_on_endangered_chunks
+        - not moosefs_chunks_undergoal or not moosefs_abort_on_undergoal_chunks
 
   post_tasks:
     - name: Check the list of connected metalogger servers using mfscli
