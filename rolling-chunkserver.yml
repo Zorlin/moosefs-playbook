@@ -17,7 +17,7 @@
 
   vars:
     moosefs_restart_chunkservers: true
-    moosefs_restart_chunkservers_force: true
+    moosefs_restart_chunkservers_force: false
     moosefs_chunkserver_upgrade_needed: false
     moosefs_abort_on_missing_chunks: true
     moosefs_abort_on_endangered_chunks: true
@@ -25,11 +25,6 @@
     moosefs_version: '3.0.115'
 
   pre_tasks:
-    - name: Print the chunkserver we are working with
-      debug:
-        msg:
-          - "The chunkserver we are working with is {{ inventory_hostname }} with IP {{ ansible_default_ipv4.address }}"
-
     - name: Check the state of the chunk matrix before any changes
       command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
       register: moosefs_chunks_status
