@@ -1,0 +1,37 @@
+---
+# This playbook optionally prints some useful information about the state of MooseFS prior to running upgrades.
+# It is intended to be used before performing a whole cluster upgrade.
+# WIP
+- name: Run checks before an upgrade
+  hosts: moosefs
+  serial: 1
+  become: true
+
+  vars_files:
+    vars/upgrade-settings.yml
+
+  pre_tasks:
+    - name: Check the state of the chunk matrix
+      command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_chunks_status
+      check_mode: false
+      changed_when: false
+
+    - name: Check the state of the chunkservers
+      command: mfscli -SCS -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_chunkserver_status
+      check_mode: false
+      changed_when: false
+
+    - name: Determine the current state of the chunk matrix
+      set_fact:
+        moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | select('search', ': 0') | length == 0 }}"
+        moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | select('search', ': 0') | length == 0 }}"
+        moosefs_chunks_undergoal: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | select('search', ': 0') | length == 0 }}"
+
+    - name: Print the current state of the chunk matrix
+      debug:
+        msg:
+          - "Chunks missing? {{ moosefs_chunks_missing }}"
+          - "Chunks endangered? {{ moosefs_chunks_endangered }}"
+          - "Chunks undergoal? {{ moosefs_chunks_undergoal }}"
