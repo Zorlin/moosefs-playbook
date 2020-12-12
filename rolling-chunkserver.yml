@@ -1,15 +1,8 @@
 ---
 # This playbook restarts the chunkservers one by one and waits for each to come up before moving to the next
 # It checks health and allows you to take different actions based on that.
-# By default it only upgrades metaloggers that are healthy and out of date.
-# Currently it does not handle package upgrades as we are not using packages yet
-# DO NOT USE YET JUST COPIED AND PASTED FROM METALOGGERS WITH A COUPLE TWEAKS
-# todo - check chunk state before and after each chunkserver restart
-# chunkclass endangered: 1300 (not do stuff if some chunks are endangered)
-# chunkclass undergoal:	163472 (not do stuff if some chunks are undergoal)
-# chunkclass missing: 0 (not do stuff if there are missing chunks unaccounted for)
-# etc...
-
+# By default it only upgrades chunkservers that are healthy and out of date.
+# Early version but nearly ready for primetime and has been tested on small systems
 - name: Restart chunkservers
   hosts: moosefs_chunkserver
   serial: 1
