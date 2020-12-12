@@ -2,6 +2,7 @@
 moosefs_master_host = mfsmaster
 
 [moosefs]
+mfsmaster ansible_host=10.1.1.199
 blinky	ansible_host=10.1.1.201
 pinky	ansible_host=10.1.1.202
 inky	ansible_host=10.1.1.203
