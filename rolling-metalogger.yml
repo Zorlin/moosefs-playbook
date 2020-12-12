@@ -4,7 +4,7 @@
 # By default it only upgrades metaloggers that are healthy and out of date.
 # Currently it does not handle package upgrades as we are not using packages yet
 # TODO - https://docs.ansible.com/ansible/latest/user_guide/playbooks_tests.html#comparing-versions should improve logic and code
-- name: Restart metaloggers
+- name: Rolling restart and upgrade of metaloggers
   hosts: moosefs_metalogger
   serial: 1
   become: true
@@ -15,11 +15,6 @@
     moosefs_version: '3.0.115'
 
   pre_tasks:
-    - name: Print the metalogger we are working with
-      debug:
-        msg:
-          - "The metalogger we are working with is {{ inventory_hostname }} with IP {{ ansible_default_ipv4.address }}"
-
     - name: Check the list of connected metalogger servers using mfscli
       command: mfscli -SMB -H {{ moosefs_master_host }} -p -s ' '
       register: moosefs_metalogger_status_list
