@@ -5,13 +5,13 @@
 # It will upgrade metaloggers first, then masters, then chunkservers, then clients, but will not restart mounts automatically.
 
 - name: Include a play after another play
-  import_playbook: rolling-metalogger.yaml
+  import_playbook: rolling-metalogger.yml
 
 #- name: Include a play after another play
-#  import_playbook: rolling-master.yaml
+#  import_playbook: rolling-master.yml
 
 - name: Include a play after another play
-  import_playbook: rolling-chunkserver.yaml
+  import_playbook: rolling-chunkserver.yml
 
 #- name: Include a play after another play
-#  import_playbook: rolling-clients.yaml
+#  import_playbook: rolling-clients.yml
