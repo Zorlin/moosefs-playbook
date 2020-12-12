@@ -9,10 +9,8 @@
   serial: 1
   become: true
 
-  vars:
-    moosefs_restart_metaloggers: true
-    moosefs_restart_metaloggers_force: false
-    moosefs_version: '3.0.115'
+  vars_files:
+    vars/upgrade-settings.yml
 
   pre_tasks:
     - name: Check the list of connected metalogger servers using mfscli
