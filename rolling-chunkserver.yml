@@ -26,7 +26,7 @@
 
     - name: Check the list of all connected chunkservers using mfscli
       command: mfscli -SCS -H {{ moosefs_master_host }} -p -s ' '
-      register: moosefs_chunkserver_status_list
+      register: moosefs_chunkserver_status
       check_mode: false
       changed_when: false
 
@@ -36,12 +36,25 @@
         moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | select('search', ': 0') | length == 0 }}"
         moosefs_chunks_undergoal: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | select('search', ': 0') | length == 0 }}"
 
+    - name: Determine the current state of the chunkserver
+      set_fact:
+        moosefs_chunkserver_connected: "{{ moosefs_chunkserver_status.stdout_lines | select('search', inventory_hostname) | length != 0 }}"
+        moosefs_chunkserver_version_match: "{{ moosefs_chunkserver_status.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length != 0 }}"
+        moosefs_chunkserver_upgrade_needed: "{{ moosefs_chunkserver_status.stdout_lines | select('search', inventory_hostname) | select('search', moosefs_version) | length == 0 }}"
+
     - name: Print the current state of the chunk matrix
       debug:
         msg:
           - "Chunks missing? {{ moosefs_chunks_missing }}"
           - "Chunks endangered? {{ moosefs_chunks_endangered }}"
           - "Chunks undergoal? {{ moosefs_chunks_undergoal }}"
+
+    - name: Print the current state of the chunkserver
+      debug:
+        msg:
+          - "Connected? {{ moosefs_chunkserver_connected }}"
+          - "Version matches target? {{ moosefs_chunkserver_version_match }}"
+          - "Upgrade needed? {{ moosefs_chunkserver_upgrade_needed }}"
 
     - name: Give some feedback as to what will happen next
       debug:
