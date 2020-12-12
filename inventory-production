@@ -8,6 +8,7 @@ inky	ansible_host=10.1.1.203
 clyde	ansible_host=10.1.1.204
 
 [moosefs_master]
+mfsmaster ansible_host=10.1.1.199
 
 [moosefs_metalogger]
 blinky	ansible_host=10.1.1.201
