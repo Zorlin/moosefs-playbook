@@ -3,7 +3,7 @@
 # It is intended to be used before performing a whole cluster upgrade.
 # WIP
 - name: Run checks before an upgrade
-  hosts: moosefs
+  hosts: moosefs_master
   serial: 1
   become: true
 
