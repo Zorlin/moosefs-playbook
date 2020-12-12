@@ -1,3 +1,12 @@
+moosefs-playbook
+================
+
+MooseFS on autopilot. Makes setting up, upgrading, maintaining and troubleshooting MooseFS a breeze.
+
+Doesn't yet support all features, but those needed for my personal MooseFS installation will be added as needed, and those I think are super cool probably even before them.
+
+Full instructions coming soon.
+
 Early WIP...
 
 inventory = testing purposes
