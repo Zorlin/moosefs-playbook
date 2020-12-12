@@ -1,0 +1,17 @@
+---
+# This combines the rolling upgrade playbooks to perform an upgrade of an entire MooseFS cluster, as safely as automatically possible.
+# On MooseFS CE, the only service interruption should occur during the master upgrade, everything else is designed to happen without downtime.
+# It currently does not yet upgrade the master, nor clients, but support for that is planned.
+# It will upgrade metaloggers first, then masters, then chunkservers, then clients, but will not restart mounts automatically.
+
+- name: Include a play after another play
+  import_playbook: rolling-metalogger.yaml
+
+#- name: Include a play after another play
+#  import_playbook: rolling-master.yaml
+
+- name: Include a play after another play
+  import_playbook: rolling-chunkserver.yaml
+
+#- name: Include a play after another play
+#  import_playbook: rolling-clients.yaml
