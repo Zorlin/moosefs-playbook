@@ -3,6 +3,9 @@
   hosts: moosefs
   become: true
 
+  vars_files:
+    vars/moosefs-settings.yml
+
   tasks:
     - name: Print Ansible info useful for development
       debug:

@@ -1,5 +1,6 @@
 [all:vars]
 moosefs_master_host = mfsmaster
+glass_env = production
 
 [moosefs]
 mfsmaster ansible_host=10.1.1.199 moosefs_install_method=package
