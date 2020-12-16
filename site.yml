@@ -4,12 +4,15 @@
   become: true
 
   vars_files:
-    vars/moosefs-settings.yml
+#    - "vars/{{ 'moosefs-settings.yml' if (glass_env is undefined) else ('moosefs-settings-'{{ glass_env }}'.yml') }}"
+    - "vars/moosefs-settings-sglab.yml"
 
-  tasks:
+  pre_tasks:
     - name: Print Ansible info useful for development
       debug:
-        msg: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
-
+        msg:
+          - "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - '{{ "vars/moosefs-settings.yml" if (glass_env is undefined) else ( "moosefs-settings-" {{ glass_env }} ) }}'
+          - 'vars/moosefs-settings {{ if (glass_env is defined) }}'
   roles:
     - zorlin.moosefs
