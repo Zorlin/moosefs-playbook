@@ -5,3 +5,5 @@
 
 # The version of MooseFS to install and upgrade to. Only used for machines that need to build from source.
 moosefs_version: '3.0.115'
+
+moosefs_installed: true
