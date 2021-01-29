@@ -1,25 +1,50 @@
 [all:vars]
-moosefs_master_host = 10.1.3.10
+moosefs_master_host = mfsmasterpro-sgl.windowpa.in
 glass_env = sglab
 
 [moosefs]
 mfsmaster01.windowpa.in moosefs_install_method=package
+mfsmaster02.windowpa.in moosefs_install_method=package
 mfscs03.windowpa.in moosefs_install_method=package
 mfscs04.windowpa.in moosefs_install_method=package
 mfscs05.windowpa.in moosefs_install_method=package
+mfscs06.windowpa.in moosefs_install_method=package
+mfscs07.windowpa.in moosefs_install_method=package
+mfscs08.windowpa.in moosefs_install_method=package
+mfscs09.windowpa.in moosefs_install_method=package
+mfscs10.windowpa.in moosefs_install_method=package
 
 [moosefs_master]
 mfsmaster01.windowpa.in moosefs_install_method=package
+mfsmaster02.windowpa.in moosefs_install_method=package
 
 [moosefs_metalogger]
 mfscs03.windowpa.in moosefs_install_method=package
 mfscs04.windowpa.in moosefs_install_method=package
 mfscs05.windowpa.in moosefs_install_method=package
+mfscs06.windowpa.in moosefs_install_method=package
+mfscs07.windowpa.in moosefs_install_method=package
+mfscs08.windowpa.in moosefs_install_method=package
+mfscs09.windowpa.in moosefs_install_method=package
+mfscs10.windowpa.in moosefs_install_method=package
 
 [moosefs_chunkserver]
 mfscs03.windowpa.in moosefs_install_method=package
 mfscs04.windowpa.in moosefs_install_method=package
 mfscs05.windowpa.in moosefs_install_method=package
+mfscs06.windowpa.in moosefs_install_method=package
+mfscs07.windowpa.in moosefs_install_method=package
+mfscs08.windowpa.in moosefs_install_method=package
+mfscs09.windowpa.in moosefs_install_method=package
+mfscs10.windowpa.in moosefs_install_method=package
 
 [moosefs_client]
 mfsmaster01.windowpa.in moosefs_install_method=package
+mfscs03.windowpa.in moosefs_install_method=package
+mfscs04.windowpa.in moosefs_install_method=package
+mfscs05.windowpa.in moosefs_install_method=package
+mfscs06.windowpa.in moosefs_install_method=package
+mfscs07.windowpa.in moosefs_install_method=package
+mfscs08.windowpa.in moosefs_install_method=package
+mfscs09.windowpa.in moosefs_install_method=package
+mfscs10.windowpa.in moosefs_install_method=package
