@@ -20,3 +20,23 @@
       package:
         name: git
         state: present
+
+    - name: Create "wings" user
+      user:
+        name: wings
+        comment: wings
+        uid: 1337
+
+    - name: Set open file limits for systemd
+      lineinfile:
+        path: /etc/systemd/system.conf
+        state: present
+        regexp: '#DefaultLimitNOFILE'
+        line: "DefaultLimitNOFILE=10000000"
+
+    - name: Set open file limits for systemd (user)
+      lineinfile:
+        path: /etc/systemd/user.conf
+        state: present
+        regexp: '#DefaultLimitNOFILE'
+        line: "DefaultLimitNOFILE=10000000"
