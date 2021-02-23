@@ -1,0 +1,18 @@
+[all:vars]
+moosefs_master_host = mfsmasterpro-regal.windowpa.in
+glass_env = regal
+
+[moosefs]
+mfsmaster-r01.windowpa.in moosefs_install_method=package
+
+[moosefs_master]
+mfsmaster-r01.windowpa.in moosefs_install_method=package
+
+[moosefs_metalogger]
+mfsmaster-r01.windowpa.in moosefs_install_method=package
+
+[moosefs_chunkserver]
+mfsmaster-r01.windowpa.in moosefs_install_method=package
+
+[moosefs_client]
+mfsmaster-r01.windowpa.in moosefs_install_method=package
