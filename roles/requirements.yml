@@ -1,4 +1,10 @@
 ---
+# Configure, install and manage MooseFS
 - name: zorlin.moosefs
   src: https://github.com/Zorlin/ansible-role-moosefs
+  version: main
+
+# Configure, install and manage io500
+- name: zorlin.io500
+  src: https://github.com/Zorlin/ansible-role-io500
   version: main
