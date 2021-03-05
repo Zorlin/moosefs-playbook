@@ -1,5 +1,5 @@
 ---
-- name: Install MooseFS
+- name: Install MooseFS and io500
   hosts: moosefs
   become: true
 
@@ -16,3 +16,4 @@
           #- 'vars/moosefs-settings {{ if (glass_env is defined) }}'
   roles:
     - zorlin.moosefs
+    - zorlin.io500

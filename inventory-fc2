@@ -1,0 +1,19 @@
+[all:vars]
+moosefs_master_host = fc2.riff.cc
+moosefs_install_method = package
+glass_env = regal
+
+[moosefs]
+fc2.riff.cc
+
+[moosefs_master]
+fc2.riff.cc
+
+[moosefs_metalogger]
+fc2.riff.cc
+
+[moosefs_chunkserver]
+fc2.riff.cc
+
+[moosefs_client]
+fc2.riff.cc
