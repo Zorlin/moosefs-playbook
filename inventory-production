@@ -1,28 +1,21 @@
 [all:vars]
-moosefs_master_host = mfsmaster
+moosefs_master_host = 10.1.1.201
 glass_env = production
 
 [moosefs]
-mfsmaster ansible_host=10.1.1.199 moosefs_install_method=package
+mfsmaster ansible_host=10.1.1.201 moosefs_install_method=package
 blinky	ansible_host=10.1.1.201
 pinky	ansible_host=10.1.1.202
-inky	ansible_host=10.1.1.203
-clyde	ansible_host=10.1.1.204
 
 [moosefs_master]
-mfsmaster ansible_host=10.1.1.199
+mfsmaster ansible_host=10.1.1.201
 
 [moosefs_metalogger]
-blinky	ansible_host=10.1.1.201
 pinky	ansible_host=10.1.1.202
-inky	ansible_host=10.1.1.203
-clyde	ansible_host=10.1.1.204
 
 [moosefs_chunkserver]
 blinky	ansible_host=10.1.1.201
 pinky	ansible_host=10.1.1.202
-inky	ansible_host=10.1.1.203
-clyde	ansible_host=10.1.1.204
 
 [moosefs_client]
 blinky	ansible_host=10.1.1.201

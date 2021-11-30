@@ -6,7 +6,7 @@
 # and you should use it if possible for your production clusters. They are the real settings I use for my own personal MooseFS.
 
 # The version of MooseFS to install and upgrade to. Only used for machines that need to build from source.
-moosefs_version: '3.0.115'
+moosefs_version: '3.0.116'
 
 # Whether or not to mount MooseFS on all clients.
 moosefs_automount: true

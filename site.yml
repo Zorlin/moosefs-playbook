@@ -1,10 +1,9 @@
 ---
-- name: Install MooseFS and io500
+- name: Install MooseFS
   hosts: moosefs
   become: true
 
   vars_files:
-#    - "vars/{{ 'moosefs-settings.yml' if (glass_env is undefined) else ('moosefs-settings-'{{ glass_env }}'.yml') }}"
     - "vars/moosefs-settings-regal.yml"
 
   pre_tasks:
@@ -16,4 +15,3 @@
           #- 'vars/moosefs-settings {{ if (glass_env is defined) }}'
   roles:
     - zorlin.moosefs
-    - zorlin.io500
