@@ -1,17 +1,21 @@
 [all:vars]
-moosefs_master_host = localhost
+moosefs_master_host = 10.1.1.201
+glass_env = production
 
 [moosefs]
-localhost
+mfsmaster ansible_host=10.1.1.201 moosefs_install_method=package
+blinky	ansible_host=10.1.1.201
+pinky	ansible_host=10.1.1.202
 
 [moosefs_master]
-localhost
+mfsmaster ansible_host=10.1.1.201
 
 [moosefs_metalogger]
-localhost
+pinky	ansible_host=10.1.1.202
 
 [moosefs_chunkserver]
-localhost
+blinky	ansible_host=10.1.1.201
+pinky	ansible_host=10.1.1.202
 
 [moosefs_client]
-localhost
+blinky	ansible_host=10.1.1.201
