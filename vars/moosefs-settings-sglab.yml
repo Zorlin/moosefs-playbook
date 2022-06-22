@@ -1,9 +1,0 @@
----
-# These settings control MooseFS for the SG laboratory inventory and environment. Treat with care.
-# Only defaults (from zorlin.moosefs) that are not appropriate for your particular needs are overridden here.
-# These are the real settings I use for my own personal MooseFS.
-
-# The version of MooseFS to install and upgrade to. Only used for machines that need to build from source.
-moosefs_version: '3.0.115'
-
-moosefs_installed: true

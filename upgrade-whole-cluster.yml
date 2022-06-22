@@ -6,6 +6,9 @@
 # It will upgrade metaloggers first, then masters, then chunkservers, then clients, but will not restart mounts automatically.
 
 - name: Include a play after another play
+  import_playbook: upgrade-whole-cluster-pre.yml
+
+- name: Include a play after another play
   import_playbook: rolling-metalogger.yml
 
 #- name: Include a play after another play

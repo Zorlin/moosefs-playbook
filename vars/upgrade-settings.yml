@@ -3,7 +3,7 @@
 # We have provided some sane defaults which you are welcome to change as needed.
 
 # The version of MooseFS to install and upgrade to. Only used for machines that need to build from source.
-moosefs_version: '3.0.115'
+moosefs_version: '3.0.101'
 
 # Settings for the metaloggers
 moosefs_restart_metaloggers: true
