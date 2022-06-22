@@ -1,5 +1,9 @@
 ---
 # Settings for MooseFS.
+
+# Filesystem format to use for chunkserver bricks (xfs or ext4)
+moosefs_brick_fstype: xfs
+
 # Only defaults (from zorlin.moosefs) that are not appropriate for your particular needs are overridden here.
 # You can adjust any of this to suit your own installations.
 

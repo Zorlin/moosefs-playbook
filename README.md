@@ -51,12 +51,6 @@ Here are a list of included inventories.
 
 * inventory is for testing purposes.
 
-* inventory-production is an example of what I use in my homelab/Elastic NAS.
-
-* inventory-sglab is the Windowpa.in MooseFS Lab in Singapore.
-
-* inventory-regal is my toy lab used for developing this playbook safely.
-
 TODO
 ====
 

@@ -1,0 +1,108 @@
+---
+- name: Create bricks
+  hosts: moosefs_chunkserver
+  become: true
+
+  vars_files:
+    - "vars/moosefs-settings.yml"
+
+  pre_tasks:
+    - name: Show disclaimer
+      debug:
+        msg:
+          - "Welcome to MooseFS! This is a helper script, designed to allow you to automatically discover and prepare 'bricks' - disks on which
+            MooseFS data is stored - for use with MooseFS."
+          - ""
+          - "IMPORTANT NOTE: You should be aware this procedure is not safe to run on servers with with non-MooseFS disks attached."
+          - "It will try to avoid doing anything dangerous, but for the safety of your data, please only use this to initialise new chunkservers."
+          - "For more information, feel free to contact the authors or ask the MooseFS team."
+
+    # - name: Check if user is ready
+    #   pause:
+    #     prompt: "Are you sure you wish to continue? Press [ENTER] to continue or press [CTRL-C] to cancel."
+
+    - name: Ensure dependencies are installed
+      package:
+        name: 
+          - xfsprogs
+          - e2fsprogs
+        state: present
+
+    - name: Print list of disks
+      debug:
+        msg: "{{ item }}"
+      when:
+        - not item.value.partitions
+        - not item.value.holders
+        - "'sd' in item.key or 'xvd' in item.key"
+      loop: "{{ ansible_devices | dict2items }}"
+
+    - name: Gather list of disks
+      set_fact:
+        disks: "{{ disks|default([]) + [item.key]}}"
+      when:
+        - not item.value.partitions
+        - not item.value.holders
+        - "'sd' in item.key or 'xvd' in item.key"
+      loop: "{{ ansible_devices | dict2items }}"
+      no_log: true
+
+    # TODO: Check list of disks for mounted partitions.
+    # We can check {{ ansible_mounts }}, then check if a device starts with item.key
+
+    # - name: Print list
+    #   pause:
+    #     prompt: "The following disks will be affected: {{ disks }} Press [ENTER] to continue or press [CTRL-C] to cancel."
+
+    - name: Create bricks (xfs)
+      community.general.filesystem:
+        fstype: xfs
+        dev: "/dev/{{ item }}"
+        state: present
+      loop: "{{ disks }}"
+      when: moosefs_brick_fstype|lower == 'xfs'
+
+    - name: Create bricks (ext4)
+      community.general.filesystem:
+        fstype: xfs
+        dev: "/dev/{{ item }}"
+        state: present
+      loop: "{{ disks }}"
+      when: moosefs_brick_fstype|lower == 'ext4'
+
+    - name: Gather facts again
+      setup:
+
+    - name: Gather UUIDs from bricks
+      set_fact:
+        uuids: "{{ uuids|default([]) + [ {'name': item.key, 'uuid': item.value.links.uuids} ]}}"
+      when:
+        - not item.value.partitions
+        - not item.value.holders
+        - "'sd' in item.key or 'xvd' in item.key"
+        - item.key in disks
+      loop: "{{ ansible_devices | dict2items }}"
+      no_log: true
+
+    - name: Create mountpoints for bricks
+      file:
+        path: "/mnt/mfsbrick.{{ item.uuid[0] }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+      loop: "{{ uuids }}"
+
+    - name: Mount the bricks
+      mount:
+        path: "/mnt/mfsbrick.{{ item.uuid[0] }}"
+        src: "UUID={{ item.uuid[0] }}"
+        fstype: "{{ moosefs_brick_fstype|lower }}"
+        opts: nofail
+        state: mounted
+      loop: "{{ uuids }}"
+
+    - name: Print a success message
+      debug:
+        msg:
+          - "Successfully created bricks. Your chunkservers should be ready to use."
