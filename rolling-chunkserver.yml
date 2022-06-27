@@ -1,17 +1,28 @@
 ---
-# This playbook restarts the chunkservers one by one and waits for each to come up before moving to the next
-# It checks health and allows you to take different actions based on that.
+# Performs a rolling restart on the chunkservers one by one and waits for 
+# each to come up before moving to the next.
+#
 # By default it only upgrades chunkservers that are healthy and out of date.
-# Early version but nearly ready for primetime and has been tested on small systems
 - name: Restart chunkservers
   hosts: moosefs_chunkserver
   serial: 1
   become: true
 
   vars_files:
-    vars/upgrade-settings.yml
+    - "vars/moosefs-settings.yml"
+    - "vars/upgrade-settings.yml"
 
   pre_tasks:
+    - name: Get MooseFS version
+      shell: "mfschunkserver -v | cut -d' ' -f 2 | cut -d'-' -f 1"
+      register: moosefs_chunkserver_version
+      check_mode: false
+      changed_when: false
+
+    - name: Set MooseFS version
+      set_fact:
+        moosefs_version: "{{ moosefs_chunkserver_version.stdout }}"
+
     - name: Check the state of the chunk matrix before any changes
       command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
       register: moosefs_chunks_status
@@ -57,12 +68,58 @@
           - "Abort due to endangered chunks: {{ moosefs_chunks_endangered and moosefs_abort_on_endangered_chunks }}"
           - "Abort due to undergoal chunks: {{ moosefs_chunks_undergoal and moosefs_abort_on_undergoal_chunks }}"
 
+    - name: Abort if we hit a failure condition
+      assert:
+        that:
+          - "moosefs_chunks_missing == false or moosefs_abort_on_missing_chunks == false"
+          - "moosefs_chunks_endangered == false or moosefs_abort_on_endangered_chunks == false"
+          - "moosefs_chunks_undergoal == false or moosefs_abort_on_undergoal_chunks == false"
+        success_msg: "All assertions passed, no abort condition found."
+        fail_msg: "ERROR: We had to abort. Please read the above logs for more details."
+
+    - name: Wait until zero missing chunks
+      command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_chunks_status
+      check_mode: false
+      changed_when: false
+      retries: 1800
+      until: "moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | select('search', ': 0') | length != 0"
+
+    - name: Wait until zero endangered chunks
+      command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_chunks_status
+      check_mode: false
+      changed_when: false
+      retries: 1800
+      until: "moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | select('search', ': 0') | length != 0"
+
+    - name: Wait until zero undergoal chunks
+      command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_chunks_status
+      check_mode: false
+      changed_when: false
+      retries: 1800
+      until: "moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | select('search', ': 0') | length != 0"
+
   tasks:
     - name: Restart chunkserver service
       service:
         name: moosefs-chunkserver
         state: restarted
       when:
+        - not moosefs_pro
+        - moosefs_restart_chunkservers
+        - moosefs_chunkserver_upgrade_needed or moosefs_restart_chunkservers_force
+        - not (moosefs_chunks_missing and moosefs_abort_on_missing_chunks)
+        - not (moosefs_chunks_endangered and moosefs_abort_on_endangered_chunks)
+        - not (moosefs_chunks_undergoal and moosefs_abort_on_undergoal_chunks)
+
+    - name: Restart chunkserver service (PRO)
+      service:
+        name: moosefs-pro-chunkserver
+        state: restarted
+      when:
+        - moosefs_pro
         - moosefs_restart_chunkservers
         - moosefs_chunkserver_upgrade_needed or moosefs_restart_chunkservers_force
         - not (moosefs_chunks_missing and moosefs_abort_on_missing_chunks)

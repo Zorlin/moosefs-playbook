@@ -1,0 +1,111 @@
+---
+# This playbook restarts the masters one by one and waits for each to come up before moving to the next.
+- name: Rolling restart of masters
+  hosts: moosefs_master
+  serial: 1
+  become: true
+
+  vars_files:
+    - "vars/moosefs-settings.yml"
+    - "vars/upgrade-settings.yml"
+
+  pre_tasks:
+    - name: Get MooseFS version
+      shell: "mfsmaster -v | cut -d' ' -f 2 | cut -d'-' -f 1" 
+      register: moosefs_master_version
+      check_mode: false
+      changed_when: false
+
+    - name: Set MooseFS version
+      set_fact:
+        moosefs_version: "{{ moosefs_master_version.stdout }}"
+
+    - name: Check the list of connected master servers using mfscli
+      command: mfscli -SIM -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_master_status_list
+      check_mode: false
+      changed_when: false
+
+    - name: Determine the current state of the master
+      set_fact:
+        moosefs_master_connected: "{{ moosefs_master_status_list.stdout_lines | select('search', ansible_default_ipv4.address) | length != 0 }}"
+        moosefs_master_version_match: "{{ moosefs_master_status_list.stdout_lines | select('search', ansible_default_ipv4.address) | select('search', moosefs_version) | length != 0 }}"
+        moosefs_master_upgrade_needed: "{{ moosefs_master_status_list.stdout_lines | select('search', ansible_default_ipv4.address) | select('search', moosefs_version) | length == 0 }}"
+
+    - name: Print the current state of the master
+      debug:
+        msg:
+          - "Connected? {{ moosefs_master_connected }}"
+          - "Version matches target? {{ moosefs_master_version_match }}"
+          - "Upgrade needed? {{ moosefs_master_upgrade_needed }}"
+
+  tasks:
+    - name: Restart master service
+      service:
+        name: moosefs-master
+        state: restarted
+      when:
+        - moosefs_restart_masters
+        - moosefs_master_upgrade_needed or moosefs_restart_masters_force
+        - not moosefs_pro
+
+    - name: Stop CE master service (PRO)
+      service:
+        name: moosefs-master
+        state: stopped
+      when:
+        - moosefs_restart_masters
+        - moosefs_master_upgrade_needed or moosefs_restart_masters_force
+        - moosefs_ce_to_pro_upgrade | default('false') | bool
+        - moosefs_pro
+
+    - name: Restart master service (PRO)
+      service:
+        name: moosefs-pro-master
+        state: restarted
+      when:
+        - moosefs_restart_masters
+        - moosefs_master_upgrade_needed or moosefs_restart_masters_force
+        - moosefs_pro
+
+    - name: Promote first master (PRO)
+      command:
+        cmd: "mfssupervisor -H {{ moosefs_master_host }} -f"
+      when:
+        - moosefs_ce_to_pro_upgrade | default('false') | bool
+        - moosefs_pro
+
+  post_tasks:
+    - name: Wait until this master is connected
+      command: mfscli -SIM -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_master_status
+      check_mode: false
+      changed_when: false
+      retries: 1800
+      until: moosefs_master_status.stdout_lines | select('search', ansible_default_ipv4.address) | length != 0
+
+    - name: Check the list of connected master servers using mfscli
+      command: mfscli -SIM -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_master_status_list
+      check_mode: false
+      changed_when: false
+
+    - name: Determine the current state of the master
+      set_fact:
+        moosefs_master_connected: "{{ moosefs_master_status_list.stdout_lines | select('search', ansible_default_ipv4.address) | length != 0 }}"
+        moosefs_master_version_match: "{{ moosefs_master_status_list.stdout_lines | select('search', ansible_default_ipv4.address) | select('search', moosefs_version) | length != 0 }}"
+        moosefs_master_upgrade_needed: "{{ moosefs_master_status_list.stdout_lines | select('search', ansible_default_ipv4.address) | select('search', moosefs_version) | length == 0 }}"
+
+    - name: Print the current state of the master
+      debug:
+        msg:
+          - "Connected? {{ moosefs_master_connected }}"
+          - "Version matches target? {{ moosefs_master_version_match }}"
+          - "Upgrade needed? {{ moosefs_master_upgrade_needed }}"
+
+    - name: Prevent moving on if there was an issue
+      assert:
+        that:
+          - moosefs_master_connected
+          - moosefs_master_version_match
+          - not moosefs_master_upgrade_needed

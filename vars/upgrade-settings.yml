@@ -2,19 +2,23 @@
 # These settings control the behaviour of the rolling upgrade scripts for managing MooseFS.
 # We have provided some sane defaults which you are welcome to change as needed.
 
-# The version of MooseFS to install and upgrade to. Only used for machines that need to build from source.
-moosefs_version: '3.0.101'
-
 # Settings for the metaloggers
 moosefs_restart_metaloggers: true
 moosefs_restart_metaloggers_force: false
 
 # Settings for the master(s)
-# not implemented yet
+moosefs_restart_masters: true
+moosefs_restart_masters_force: false
 
 # Settings for the chunkservers
 moosefs_restart_chunkservers: true
-moosefs_restart_chunkservers_force: false
+moosefs_restart_chunkservers_force: true
+
+# Safety settings
+moosefs_wait_on_missing_chunks: true
+moosefs_wait_on_endangered_chunks: true
+moosefs_wait_on_undergoal_chunks: true
+
 moosefs_abort_on_missing_chunks: true
 moosefs_abort_on_endangered_chunks: true
 moosefs_abort_on_undergoal_chunks: false

@@ -8,7 +8,8 @@
   become: true
 
   vars_files:
-    vars/upgrade-settings.yml
+    - "vars/moosefs-settings.yml"
+    - "vars/upgrade-settings.yml"
 
   pre_tasks:
     - name: Check the state of the chunk matrix
@@ -16,18 +17,21 @@
       register: moosefs_chunks_status
       check_mode: false
       changed_when: false
+      when: inventory_hostname == ansible_play_hosts[0]
 
     - name: Check the state of the chunkservers
       command: mfscli -SCS -H {{ moosefs_master_host }} -p -s ' '
       register: moosefs_chunkserver_status
       check_mode: false
       changed_when: false
+      when: inventory_hostname == ansible_play_hosts[0]
 
     - name: Determine the current state of the chunk matrix
       set_fact:
         moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | select('search', ': 0') | length == 0 }}"
         moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | select('search', ': 0') | length == 0 }}"
         moosefs_chunks_undergoal: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | select('search', ': 0') | length == 0 }}"
+      when: inventory_hostname == ansible_play_hosts[0]
 
     - name: Print the current state of the chunk matrix
       debug:
@@ -35,3 +39,4 @@
           - "Chunks missing? {{ moosefs_chunks_missing }}"
           - "Chunks endangered? {{ moosefs_chunks_endangered }}"
           - "Chunks undergoal? {{ moosefs_chunks_undergoal }}"
+      when: inventory_hostname == ansible_play_hosts[0]

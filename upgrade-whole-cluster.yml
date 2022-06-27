@@ -1,18 +1,73 @@
 ---
 # This combines the rolling upgrade playbooks to perform an upgrade of an entire MooseFS cluster, as safely as automatically possible.
 # On MooseFS CE, the only service interruption should occur during the master upgrade, everything else is designed to happen without downtime.
-# It currently does not yet upgrade the master, nor clients, but support for that is planned.
-# (SOON) Before and after running the upgrade, it will print some useful information.
 # It will upgrade metaloggers first, then masters, then chunkservers, then clients, but will not restart mounts automatically.
 
 - name: Include a play after another play
   import_playbook: upgrade-whole-cluster-pre.yml
 
+- name: Upgrade MooseFS packages and remove old MooseFS (if installed via source method)
+  hosts: moosefs
+  serial: 1
+  become: true
+
+  vars_files:
+    - "vars/moosefs-settings.yml"
+    - "vars/upgrade-settings.yml"
+
+  tasks:
+    - name: Check MooseFS version
+      shell:
+        cmd: "mfscli -SIG -H {{ moosefs_master_host }} -p -s ' ' | grep 'master version' | cut -d' ' -f5"
+      register: moosefs_version_detected
+      changed_when: false
+
+    - name: Check if MooseFS appears to have been installed using source method
+      stat:
+        path: /usr/local/src/moosefs-{{ moosefs_version_detected.stdout }}/moosefs-{{ moosefs_version_detected.stdout }}
+      register: moosefs_source_installed
+
+    - name: Uninstall MooseFS (source)
+      command:
+        cmd: make uninstall
+        chdir: /usr/local/src/moosefs-{{ moosefs_version_detected.stdout }}/moosefs-{{ moosefs_version_detected.stdout }}
+      when: moosefs_source_installed.stat.exists
+
+    - name: Update MooseFS packages (if installed)
+      ansible.builtin.apt:
+        name:
+          - moosefs-cli
+          - moosefs-master
+          - moosefs-cgi
+          - moosefs-cgiserv
+          - moosefs-metalogger
+          - moosefs-chunkserver
+          - moosefs-client
+        state: latest
+        only_upgrade: true
+        update_cache: yes
+      when: not moosefs_pro
+
+    - name: Update MooseFS PRO packages (if installed)
+      ansible.builtin.apt:
+        name:
+          - moosefs-pro-cli
+          - moosefs-pro-master
+          - moosefs-pro-cgi
+          - moosefs-pro-cgiserv
+          - moosefs-pro-metalogger
+          - moosefs-pro-chunkserver
+          - moosefs-pro-client
+        state: latest
+        only_upgrade: true
+        update_cache: yes
+      when: moosefs_pro
+
 - name: Include a play after another play
   import_playbook: rolling-metalogger.yml
 
-#- name: Include a play after another play
-#  import_playbook: rolling-master.yml
+- name: Include a play after another play
+  import_playbook: rolling-master.yml
 
 - name: Include a play after another play
   import_playbook: rolling-chunkserver.yml

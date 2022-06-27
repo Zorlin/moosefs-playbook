@@ -7,5 +7,14 @@ moosefs_brick_fstype: xfs
 # Only defaults (from zorlin.moosefs) that are not appropriate for your particular needs are overridden here.
 # You can adjust any of this to suit your own installations.
 
+# MooseFS master host
+moosefs_master_host: mfsmaster-lab
+
 # The version of MooseFS to install and upgrade to. Only used for machines that need to build from source.
-moosefs_version: '3.0.100'
+moosefs_version: '3.0.115'
+
+# Enable MooseFS Pro
+moosefs_pro: true
+
+# MooseFS install method.
+moosefs_install_method: official

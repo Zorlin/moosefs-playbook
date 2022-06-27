@@ -1,0 +1,139 @@
+---
+# This is a special playbook intended to allow you to automatically upgrade
+# from MooseFS CE to MooseFS PRO.
+# Status: EARLY DEVELOPMENT
+- name: Preparation phase
+  hosts: moosefs
+  become: true
+
+  vars:
+    moosefs_pro_licenced: false
+
+  vars_files:
+    - "vars/moosefs-settings.yml"
+    - "vars/upgrade-settings.yml"
+
+  pre_tasks:
+    # TODO: Move this check to use mfscli -v instead
+    - name: Check MooseFS version
+      shell:
+        cmd: "mfscli -SIG -H {{ moosefs_master_host }} -p -s ' ' | grep 'master version' | cut -d' ' -f5"
+      register: moosefs_version_detected
+      changed_when: false
+
+    - name: Check if MooseFS version is within range for upgrade
+      ansible.builtin.assert:
+        that:
+          - "{{ moosefs_version_detected.stdout is version('3.0', '>=') }}"
+          - "{{ moosefs_version_detected.stdout is version('4.0', '<') }}"
+        fail_msg: "MooseFS version is out of range or unknown. Please ask for help."
+        success_msg: "MooseFS version detected appears valid for upgrade."
+      when: inventory_hostname == ansible_play_hosts[0]
+
+    - name: Check that MooseFS Pro is enabled and that we're using official packages
+      ansible.builtin.assert:
+        that:
+          - moosefs_pro == true
+          - moosefs_install_method == "official"
+        fail_msg: "Please enable MooseFS Pro in vars/moosefs-settings.yml and ensure install method is set to 'official'."
+        success_msg: "MooseFS Pro is enabled and the official installation method is selected."
+
+    - name: Check that we have a licence and that it is of non-zero length.
+      set_fact:
+        moosefs_pro_licenced: true
+      when: "((playbook_dir,  'mfslicence.bin') | path_join) is file"
+
+    - name: Fail if unlicenced
+      ansible.builtin.assert:
+        that:
+          - moosefs_pro_licenced == true
+        fail_msg: "You don't appear to have a MooseFS Pro licence. Please place one in the root of the playbook and try again."
+        success_msg: "You appear to have a MooseFS Pro licence file. Continuing!"
+      when: inventory_hostname == ansible_play_hosts[0]
+
+    - name: Check the state of the chunk matrix
+      command: mfscli -SIC -H {{ moosefs_master_host }} -p -s ' '
+      register: moosefs_chunks_status
+      check_mode: false
+      changed_when: false
+      when: inventory_hostname == ansible_play_hosts[0]
+
+    - name: Check the version of the chunkservers
+      shell: "mfscli -SCS -H {{ moosefs_master_host }} -p -s ' ' | cut -d' ' -f7"
+      register: moosefs_chunkserver_status
+      check_mode: false
+      changed_when: false
+      when: inventory_hostname == ansible_play_hosts[0]
+
+    - name: Check chunkserver's MooseFS version is within range for upgrade
+      ansible.builtin.assert:
+        that:
+          - "{{ item is version('3.0', '>=') }}"
+          - "{{ item is version('4.0', '<') }}"
+      loop: "{{ moosefs_chunkserver_status.stdout.splitlines() }}"
+      when: inventory_hostname == ansible_play_hosts[0]
+
+    - name: Determine the current state of the chunk matrix
+      set_fact:
+        moosefs_chunks_missing: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass missing:') | select('search', ': 0') | length == 0 }}"
+        moosefs_chunks_endangered: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass endangered:') | select('search', ': 0') | length == 0 }}"
+        moosefs_chunks_undergoal: "{{ moosefs_chunks_status.stdout_lines | select('search', 'chunkclass undergoal:') | select('search', ': 0') | length == 0 }}"
+      when: inventory_hostname == ansible_play_hosts[0]
+
+    - name: Print the current state of the chunk matrix
+      debug:
+        msg:
+          - "Chunks missing? {{ moosefs_chunks_missing }}"
+          - "Chunks endangered? {{ moosefs_chunks_endangered }}"
+          - "Chunks undergoal? {{ moosefs_chunks_undergoal }}"
+      when: inventory_hostname == ansible_play_hosts[0]
+
+  tasks:
+    - name: Check if MooseFS appears to have been installed using source method
+      stat:
+        path: /usr/local/src/moosefs-{{ moosefs_version_detected.stdout }}/moosefs-{{ moosefs_version_detected.stdout }}
+      register: moosefs_source_installed
+
+    - name: Uninstall MooseFS (source)
+      command:
+        cmd: make uninstall
+        chdir: /usr/local/src/moosefs-{{ moosefs_version_detected.stdout }}/moosefs-{{ moosefs_version_detected.stdout }}
+      when: moosefs_source_installed.stat.exists
+
+    - name: Uninstall MooseFS (official/package)
+      package:
+        name:
+          - moosefs-master
+          - moosefs-metalogger
+          - moosefs-chunkserver
+          - moosefs-client
+          - moosefs-cli
+          - moosefs-cgi
+          - moosefs-cgiserv
+        state: absent
+
+- name: Install new MooseFS binaries
+  import_playbook: site.yml
+  vars:
+    moosefs_upgrade: true
+
+- name: Restart metaloggers
+  import_playbook: rolling-metalogger.yml
+  vars:
+    moosefs_upgrade: true
+
+# We upgrade the chunkservers *before* the master... to allow the chunkservers to
+# elect a leader.
+- name: Restart chunkservers
+  import_playbook: rolling-chunkserver.yml
+  vars:
+    moosefs_upgrade: true
+
+- name: Restart masters
+  import_playbook: rolling-master.yml
+  vars:
+    moosefs_upgrade: true
+    moosefs_ce_to_pro_upgrade: true
+
+- name: Restart clients
+  import_playbook: rolling-clients.yml

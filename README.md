@@ -3,42 +3,40 @@ moosefs-playbook
 
 MooseFS on autopilot. Makes setting up, upgrading, maintaining and troubleshooting MooseFS a breeze.
 
-Doesn't yet support all features, but those needed for my personal MooseFS installation will be added as needed, and those I think are super cool probably even before them.
-
 Getting started
 ===============
 
 Clone this repository somewhere handy
-* git clone https://github.com/Zorlin/scrutiny-playbook.git
+* git clone https://github.com/Zorlin/moosefs-playbook.git
 
 Generate an SSH key if you don't already have one
 * ssh-keygen
 
-Copy your key to user "root" on all the boxes you want to manage (replace localhost with the machine you want)
-* ssh-copy-id root@localhost
+Copy your key to all the boxes you want to manage (replace localhost with the machine you want)
+* ssh-copy-id localhost
 
 Edit the inventory file. You will need at least one master and at least one chunkserver for a functional MooseFS installation. Three or more chunkservers are strongly recommended.
 
-You should specify "moosefs_install_method" (currently "package" or "build" are supported) in your inventory file, but you can override it for each node.
+You should specify "moosefs_install_method" in your inventory file, but you can override it for each node.
 
 Here's an example:
 
 ```
 [all:vars]
-moosefs_master_host = mfsmaster-r01.windowpa.in
+moosefs_master_host = mfsmaster-lab
 moosefs_install_method = package
 
 [moosefs]
-mfsmaster-r01.windowpa.in
+mfs-m01
 
 [moosefs_master]
-mfsmaster-r01.windowpa.in
+mfs-m01
 
 [moosefs_metalogger]
-mfsmaster-r01.windowpa.in
+mfs-m01
 
 [moosefs_chunkserver]
-mfsmaster-r01.windowpa.in
+mfs-m01
 ```
 
 Install the required roles and do an Ansible run.
