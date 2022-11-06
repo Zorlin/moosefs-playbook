@@ -11,10 +11,10 @@ moosefs_brick_fstype: xfs
 moosefs_master_host: mfsmaster
 
 # The version of MooseFS to install and upgrade to. Only used for machines that need to build from source.
-moosefs_version: '3.0.115'
+moosefs_version: '3.0.116'
 
 # Enable MooseFS Pro
-moosefs_pro: true
+moosefs_pro: false
 
 # MooseFS install method.
 moosefs_install_method: official
