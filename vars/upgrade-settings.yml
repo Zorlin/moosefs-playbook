@@ -12,7 +12,7 @@ moosefs_restart_masters_force: false
 
 # Settings for the chunkservers
 moosefs_restart_chunkservers: true
-moosefs_restart_chunkservers_force: true
+moosefs_restart_chunkservers_force: false
 
 # Safety settings
 moosefs_wait_on_missing_chunks: true
