@@ -1,4 +1,4 @@
 ---
 - name: zorlin.moosefs
   src: https://github.com/Zorlin/ansible-role-moosefs
-  version: main
+  version: ehi

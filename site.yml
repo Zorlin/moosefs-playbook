@@ -3,8 +3,5 @@
   hosts: moosefs
   become: true
 
-  vars_files:
-    - "vars/moosefs-settings.yml"
-
   roles:
     - zorlin.moosefs
